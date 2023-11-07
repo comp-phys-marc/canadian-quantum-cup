@@ -1,4 +1,5 @@
 import json
+import math
 import pennylane as qml
 import pennylane.numpy as np
 
@@ -20,8 +21,10 @@ def evolve_atom_cat(unitary, params):
         (np.tensor): The state of the joint atom-cat system after unitary evolution.
     """
 
-
-    # Put your code here #
+    theta, phi, delta = params
+    qml.QubitUnitary(unitary, wires=['atom', 'cat'])
+    qml.U3(theta, phi, delta, wires=['atom'])
+    return qml.state()
 
 
 def u3_parameters(unitary):
@@ -38,9 +41,22 @@ def u3_parameters(unitary):
         state |0>.
     """
 
-    # Put your code here #
+    atom = np.array([[1.], [0.]])  # |0>
+    cat = np.array([[1.], [0.]])  # |0>
+    system = np.kron(atom, cat)  # |00>
 
-    # Return a set of parameters that satisfy the required condition
+    evolved = unitary @ system
+
+    a = float(evolved[0])
+    b = float(evolved[1])
+    c = float(evolved[2])
+    d = float(evolved[3])
+
+    delta = np.pi
+    lhs = (a - b) / ((c - d) * math.exp(i * delta))
+    theta = np.arctan(lhs) * 2
+
+    return np.array([theta, 0, delta])
 
 
 # These functions are responsible for testing the solution.

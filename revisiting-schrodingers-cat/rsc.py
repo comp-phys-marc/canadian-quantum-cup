@@ -23,7 +23,13 @@ def evolve_atom_cat(unitary, params):
 
     theta, phi, delta = params
     qml.QubitUnitary(unitary, wires=['atom', 'cat'])
-    qml.U3(theta, phi, delta, wires=['atom'])
+
+    # phi is 0 and delta is pi so this is simplified
+    qml.QubitUnitary(np.array([[np.cos(theta/2), -np.cos(delta) * np.sin(theta/2)],
+                               [np.sin(theta/2), np.cos(delta) * np.cos(theta/2)]]), wires=['atom'])
+
+    qml.QubitUnitary(np.array([[1., 0.],
+                               [0., 0.]]), wires=['atom'])
     return qml.state()
 
 
@@ -53,7 +59,7 @@ def u3_parameters(unitary):
     d = float(evolved[3])
 
     delta = np.pi
-    lhs = (a - b) / ((c - d) * math.exp(i * delta))
+    lhs = -(a - b) / ((c - d) * math.exp(i * delta))
     theta = np.arctan(lhs) * 2
 
     return np.array([theta, 0, delta])

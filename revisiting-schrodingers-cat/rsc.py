@@ -59,7 +59,7 @@ def u3_parameters(unitary):
     d = float(evolved[3])
 
     delta = np.pi
-    lhs = -(a - b) / ((c - d) * math.exp(i * delta))
+    lhs = (a - b) / ((c - d) * (np.cos(delta) - complex(0, np.sin(delta))))
     theta = np.arctan(lhs) * 2
 
     return np.array([theta, 0, delta])

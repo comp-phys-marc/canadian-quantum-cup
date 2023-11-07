@@ -18,6 +18,15 @@ def maximal_probability(theta_1, theta_2, p_1, p_2):
         (Union[float, np.tensor]): Maximal probability of distinguishing the states.
 
     """
+    N=10
+    thetas = np.linspace(-N,N,1000)
+    thetas = thetas%(2*np.pi)
+    ans = 0
+    for theta in thetas:
+        curr = ((np.cos(theta-theta_1))**2)*p_1 + ((np.sin(theta-theta_2))**2)*p_2
+        ans = max(ans,curr)
+    print(ans)
+    return ans
 
 
 

@@ -1,9 +1,10 @@
+# %%
+
 import json
 import pennylane as qml
 import pennylane.numpy as np
 
 # %%
-from pennylane import QNode
 
 edges = [(0, 1), (1, 2), (2, 0), (2, 3)]
 num_wires = 4
@@ -23,30 +24,6 @@ ops = [qml.PauliX(wire) for wire in range(num_wires)]
 coeffs = [1.] * 4
 mixer_hamiltonian = qml.Hamiltonian(coeffs, ops)
 
-class NamedQaoaCircuit:
-
-    def __init__(self, circuit, ops):
-        self.circuit = circuit
-        self.ops = ops
-
-    def __getattr__(self, item):
-        if item == 'qtape':
-            return self.ops
-        else:
-            return self.circuit.__getattribute__(item)
-
-class NamedTape:
-
-    def __init__(self, tape, params, noise_param):
-        self.tape = tape
-        self.params = params
-        self.noise_param = noise_param
-
-    def __getattr__(self, item):
-        if item == 'operations':
-            return get_noisy_circuit_list(self.params, self.noise_param)
-        else:
-            return self.tape.__getattribute__(item)
 
 def get_noisy_circuit_list(params, noise_param):
     with qml.tape.QuantumTape() as tape:
@@ -54,7 +31,7 @@ def get_noisy_circuit_list(params, noise_param):
             qml.qaoa.cost_layer(layer_params[0], cost_hamiltonian)
             qml.qaoa.mixer_layer(layer_params[1], mixer_hamiltonian)
 
-    compile_tape = tape.expand(depth=4)
+    compile_tape = tape.expand(depth=3)
 
     noisy_op_list = []
     for op in compile_tape:
@@ -65,12 +42,19 @@ def get_noisy_circuit_list(params, noise_param):
     return noisy_op_list
 
 
+@qml.qfunc_transform
+def remove_qtape_from_circ(tape):
+    for op in tape.operations[1:] + tape.measurements:
+        qml.apply(op)
+
+
 # %%
 
 dev = qml.device('default.mixed', wires=num_wires)
 
 
 @qml.qnode(dev)
+@remove_qtape_from_circ
 def qaoa_circuit(params, noise_param):
     """
     Define the noisy QAOA circuit with only CNOT and rotation gates, with Depolarizing noise
@@ -91,6 +75,7 @@ def qaoa_circuit(params, noise_param):
     return qml.expval(cost_hamiltonian)
 
 
+# %%
 
 def approximation_ratio(qaoa_depth, noise_param):
     """
@@ -108,7 +93,7 @@ def approximation_ratio(qaoa_depth, noise_param):
     true_min_expval = min(qml.eigvals(cost_hamiltonian))
 
     optimizer = qml.GradientDescentOptimizer()
-    steps = 10
+    steps = 100
     params = np.random.randn(qaoa_depth, 2, requires_grad=True)
 
     qaoa_circuit(params, noise_param)
@@ -164,13 +149,13 @@ def check(solution_output: str, expected_output: str) -> None:
     solution_output = json.loads(solution_output)
     expected_output = json.loads(expected_output)
 
-    tape = NamedTape(qaoa_circuit.qtape, [[.1, .1]], .1)
+    tape = qaoa_circuit.qtape
     names = [op.name for op in tape.operations]
     random_params = np.array([np.random.rand(2)])
 
-    # assert circuit_check, "qaoa_circuit is not doing what it's expected to."
+    assert circuit_check, "qaoa_circuit is not doing what it's expected to."
 
-    # assert names.count('ApproxTimeEvolution') == 0, "Your circuit must not use the built-in PennyLane Trotterization."
+    assert names.count('ApproxTimeEvolution') == 0, "Your circuit must not use the built-in PennyLane Trotterization."
 
     assert set(names) == {'DepolarizingChannel', 'RX', 'RY', 'RZ',
                           'CNOT'}, "Your circuit must use qml.RX, qml.RY, qml.RZ, qml.CNOT, and qml.DepolarizingChannel."
@@ -213,3 +198,22 @@ for i, (input_, expected_output) in enumerate(test_cases):
 for op in qaoa_circuit.qtape.operations:
     print(op)
 
+
+    except Exception as exc:
+    print(f"Runtime Error. {exc}")
+
+else:
+    if message := check(output, expected_output):
+        print(f"Wrong Answer. Have: '{output}'. Want: '{expected_output}'.")
+
+    else:
+        print("Correct!")
+
+# %%
+
+for op in qaoa_circuit.qtape.operations:
+    print(op)
+
+# %%
+
+get_noisy_circuit_list([[.1, .2]], .1)

@@ -34,9 +34,11 @@ def oracle_distance(d):
     qml.toffoli([2,5,8])
     
     qml.toffoli([6,7,8,9])
-    #phase_flip with qubit 9
-    
-    #phase_flip with qubit 9
+
+    qml.Hadamard(wires=[9])  # |->
+    qml.X(wires=[9])  # - |->
+    qml.Hadamard(wires=[9])  # - |1>
+
     # uncomputation
     qml.toffoli([6,7,8,9])
     qml.toffoli([0,3,6])
@@ -64,9 +66,11 @@ def oracle_distance(d):
     qml.toffoli([2,5,8])
     
     qml.toffoli([6,7,8,9])
-    #phase_flip with qubit 9
-    
-    #phase_flip with qubit 9
+
+    qml.Hadamard(wires=[9])  # |->
+    qml.X(wires=[9])  # - |->
+    qml.Hadamard(wires=[9])  # - |1>
+
     # uncomputation
     qml.toffoli([6,7,8,9])
     qml.toffoli([0,3,6])
@@ -141,6 +145,7 @@ test_cases = [
     ('6', 'No output'),
     ('7', 'No output')
 ]
+
 
 # This will run the public test cases locally
 for i, (input_, expected_output) in enumerate(test_cases):

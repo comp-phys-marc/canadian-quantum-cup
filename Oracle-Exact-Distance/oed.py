@@ -43,17 +43,39 @@ def oracle_distance(d):
     qml.Toffoli([0,3,6])
     qml.Toffoli([1,4,7])
     qml.Toffoli([2,5,8])
+    # all 0s
+    for i in range(len([0,3,1,4,2,5])):
+        qml.PauliX(i)
+    qml.Toffoli([0,3,6])
+    qml.Toffoli([1,4,7])
+    qml.Toffoli([2,5,8])
+    for i in range(len([0,3,1,4,2,5])):
+        qml.PauliX(i)
+    # all 0s
     
     qml.MultiControlledX([6,7,8], 9)
     
     qml.Toffoli([0,3,6])
     qml.Toffoli([1,4,7])
     qml.Toffoli([2,5,8])
+    # all 0s
+    for i in range(len([0,3,1,4,2,5])):
+        qml.PauliX(i)
+    qml.Toffoli([0,3,6])
+    qml.Toffoli([1,4,7])
+    qml.Toffoli([2,5,8])
+    for i in range(len([0,3,1,4,2,5])):
+        qml.PauliX(i)
+    # all 0s
     
     inverse_fourier_basis([0,1,2],d)
+    qml.Hadamard(9)
+    qml.PauliX(9)
     
     #======================================#
     
+    qml.PauliX(9)
+    qml.Hadamard(9)
     # state_2+d=state_1
     fourier_basis([3,4,5],d)
     
@@ -61,12 +83,30 @@ def oracle_distance(d):
     qml.Toffoli([0,3,6])
     qml.Toffoli([1,4,7])
     qml.Toffoli([2,5,8])
+    # all 0s
+    for i in range(len([0,3,1,4,2,5])):
+        qml.PauliX(i)
+    qml.Toffoli([0,3,6])
+    qml.Toffoli([1,4,7])
+    qml.Toffoli([2,5,8])
+    for i in range(len([0,3,1,4,2,5])):
+        qml.PauliX(i)
+    # all 0s
     
     qml.MultiControlledX([6,7,8], 9)
     
     qml.Toffoli([0,3,6])
     qml.Toffoli([1,4,7])
     qml.Toffoli([2,5,8])
+    # all 0s
+    for i in range(len([0,3,1,4,2,5])):
+        qml.PauliX(i)
+    qml.Toffoli([0,3,6])
+    qml.Toffoli([1,4,7])
+    qml.Toffoli([2,5,8])
+    for i in range(len([0,3,1,4,2,5])):
+        qml.PauliX(i)
+    # all 0s
     
     inverse_fourier_basis([3,4,5],d)
 
@@ -97,8 +137,10 @@ def run(test_case_input: str) -> str:
     for n in range(8):
         for m in range(8):
             outputs.append(sum(circuit(n, m, d)).real)
+            print(n,m,d,circuit(n, m, d))
     outputs.append(d)
-    output_list = [elem.numpy() for elem in outputs[:-1]] + [outputs[-1]]
+    output_list = [elem for elem in outputs[:-1]] + [outputs[-1]]
+    
     return str(output_list)
 
 

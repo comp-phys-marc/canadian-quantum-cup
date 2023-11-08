@@ -12,14 +12,14 @@ wires_aux = [6, 7, 8, 9, 10]  # auxiliary qubits you can use
 # Create all the helper functions you need here
 def fourier_basis(wire_list,d):
     qml.QFT(wires=wire_list)
-    for i in range(len(wire_list)):
+    for i in wire_list:
         const = d*np.pi/(2**i)
         qml.PhaseShift(const ,wires=[i])
     qml.adjoint(qml.QFT(wires=wire_list))
     
 def inverse_fourier_basis(wire_list,d):
     qml.QFT(wires=wire_list)
-    for i in range(len(wire_list)):
+    for i in wire_list:
         const = -d*np.pi/(2**i)
         qml.PhaseShift(const ,wires=[i])
     qml.adjoint(qml.QFT(wires=wire_list))
@@ -35,12 +35,12 @@ def set_flags(d):
     qml.Toffoli([1,4,7])
     qml.Toffoli([2,5,8])
     # all 0s
-    for i in range(len([0,3,1,4,2,5])):
+    for i in [0,3,1,4,2,5]:
         qml.PauliX(i)
     qml.Toffoli([0,3,6])
     qml.Toffoli([1,4,7])
     qml.Toffoli([2,5,8])
-    for i in range(len([0,3,1,4,2,5])):
+    for i in [0,3,1,4,2,5]:
         qml.PauliX(i)
     # all 0s
     
@@ -50,12 +50,12 @@ def set_flags(d):
     qml.Toffoli([1,4,7])
     qml.Toffoli([2,5,8])
     # all 0s
-    for i in range(len([0,3,1,4,2,5])):
+    for i in [0,3,1,4,2,5]:
         qml.PauliX(i)
     qml.Toffoli([0,3,6])
     qml.Toffoli([1,4,7])
     qml.Toffoli([2,5,8])
-    for i in range(len([0,3,1,4,2,5])):
+    for i in [0,3,1,4,2,5]:
         qml.PauliX(i)
     # all 0s
     
@@ -64,7 +64,6 @@ def set_flags(d):
 #     qml.PauliX(9)
     
     #======================================#
-#     if d!=0:
 #         qml.PauliX(9)
 #         qml.Hadamard(9)
     # state_2+d=state_1
@@ -75,27 +74,27 @@ def set_flags(d):
     qml.Toffoli([1,4,7])
     qml.Toffoli([2,5,8])
     # all 0s
-    for i in range(len([0,3,1,4,2,5])):
+    for i in [0,3,1,4,2,5]:
         qml.PauliX(i)
     qml.Toffoli([0,3,6])
     qml.Toffoli([1,4,7])
     qml.Toffoli([2,5,8])
-    for i in range(len([0,3,1,4,2,5])):
+    for i in [0,3,1,4,2,5]:
         qml.PauliX(i)
     # all 0s
 
-    qml.MultiControlledX([6,7,8], 10)
+    qml.MultiControlledX([6,7,8,9], 10, '1110')
 
     qml.Toffoli([0,3,6])
     qml.Toffoli([1,4,7])
     qml.Toffoli([2,5,8])
     # all 0s
-    for i in range(len([0,3,1,4,2,5])):
+    for i in [0,3,1,4,2,5]:
         qml.PauliX(i)
     qml.Toffoli([0,3,6])
     qml.Toffoli([1,4,7])
     qml.Toffoli([2,5,8])
-    for i in range(len([0,3,1,4,2,5])):
+    for i in [0,3,1,4,2,5]:
         qml.PauliX(i)
     # all 0s
 
@@ -115,16 +114,16 @@ def oracle_distance(d):
     
     set_flags(d)
     
-    qml.CNOT((9,6))
-    qml.CNOT((10,6))
+    qml.CNOT((9, 6))
+    qml.CNOT((10, 6))
     qml.MultiControlledX([9, 10], wires=[6])
 
-    qml.Hadamard(6) # |->
-    qml.PauliX(6) # - |->
-    qml.Hadamard(6) # - |1>
+    qml.Hadamard(6)  # |->
+    qml.PauliX(6)  # - |->
+    qml.Hadamard(6)  # - |1>
     qml.PauliX(6)
     
-#     set_flags(d)
+    set_flags(d)
 
 # These functions are responsible for testing the solution.
 wires_m = [0, 1, 2]

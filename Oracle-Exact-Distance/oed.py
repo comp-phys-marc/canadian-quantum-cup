@@ -10,7 +10,20 @@ wires_aux = [6, 7, 8, 9, 10]  # auxiliary qubits you can use
 # Put your code here #
 
 # Create all the helper functions you need here
-
+def fourier_basis(wire_list,d):
+    qml.QFT(wires=wire_list)
+    for i in range(len(wire_list)):
+        const = d*np.pi/(2**i)
+        qml.PhaseShift(const ,wires=[i])
+    qml.adjoint(qml.QFT(wires=wire_list))
+    
+def inverse_fourier_basis(wire_list,d):
+    qml.QFT(wires=wire_list)
+    for i in range(len(wire_list)):
+        const = -d*np.pi/(2**i)
+        qml.PhaseShift(const ,wires=[i])
+    qml.adjoint(qml.QFT(wires=wire_list))
+    
 
 def oracle_distance(d):
     """
@@ -21,68 +34,44 @@ def oracle_distance(d):
     necessary gates that implement the requested oracle.
 
     """
+    qml.PauliX(9)
+    qml.Hadamard(9)
     # state_1+d==state_2?
-    qml.QFT(wires=[0,1,2])
-    for i in range(len([0,1,2])):
-        const = d*np.pi/(2**i)
-        qml.PhaseShift(const ,wires=[i])
-    qml.QFT(wires=[0,1,2]).inv()
+    fourier_basis([0,1,2],d)
     
     # check if state_1[i]==state_2[i]
-    qml.toffoli([0,3,6])
-    qml.toffoli([1,4,7])
-    qml.toffoli([2,5,8])
+    qml.Toffoli([0,3,6])
+    qml.Toffoli([1,4,7])
+    qml.Toffoli([2,5,8])
     
-    qml.toffoli([6,7,8,9])
-
-    qml.Hadamard(wires=[9])  # |->
-    qml.X(wires=[9])  # - |->
-    qml.Hadamard(wires=[9])  # - |1>
-
-    # uncomputation
-    qml.toffoli([6,7,8,9])
-    qml.toffoli([0,3,6])
-    qml.toffoli([1,4,7])
-    qml.toffoli([2,5,8])
-    qml.QFT(wires=[0,1,2])
-    for i in range(len([0,1,2])):
-        const = -d*np.pi/(2**i)
-        qml.PhaseShift(const ,wires=[i])
-    qml.QFT(wires=[0,1,2]).inv()
+    qml.MultiControlledX([6,7,8], 9)
     
+    qml.Toffoli([0,3,6])
+    qml.Toffoli([1,4,7])
+    qml.Toffoli([2,5,8])
+    
+    inverse_fourier_basis([0,1,2],d)
     
     #======================================#
     
     # state_2+d=state_1
-    qml.QFT(wires=[3,4,5])
-    for i in range(len([3,4,5])):
-        const = d*np.pi/(2**i)
-        qml.PhaseShift(const ,wires=[i])
-    qml.QFT(wires=[3,4,5]).inv()
+    fourier_basis([3,4,5],d)
     
     # check if state_1[i]==state_2[i]
-    qml.toffoli([0,3,6])
-    qml.toffoli([1,4,7])
-    qml.toffoli([2,5,8])
+    qml.Toffoli([0,3,6])
+    qml.Toffoli([1,4,7])
+    qml.Toffoli([2,5,8])
     
-    qml.toffoli([6,7,8,9])
+    qml.MultiControlledX([6,7,8], 9)
+    
+    qml.Toffoli([0,3,6])
+    qml.Toffoli([1,4,7])
+    qml.Toffoli([2,5,8])
+    
+    inverse_fourier_basis([3,4,5],d)
 
-    qml.Hadamard(wires=[9])  # |->
-    qml.X(wires=[9])  # - |->
-    qml.Hadamard(wires=[9])  # - |1>
-
-    # uncomputation
-    qml.toffoli([6,7,8,9])
-    qml.toffoli([0,3,6])
-    qml.toffoli([1,4,7])
-    qml.toffoli([2,5,8])
-    qml.QFT(wires=[3,4,5])
-    for i in range(len([0,1,2])):
-        const = -d*np.pi/(2**i)
-        qml.PhaseShift(const ,wires=[i])
-    qml.QFT(wires=[3,4,5]).inv()
-
-
+    qml.Hadamard(9)
+    qml.PauliX(9)
     # Put your code here
 
 
@@ -145,7 +134,6 @@ test_cases = [
     ('6', 'No output'),
     ('7', 'No output')
 ]
-
 
 # This will run the public test cases locally
 for i, (input_, expected_output) in enumerate(test_cases):

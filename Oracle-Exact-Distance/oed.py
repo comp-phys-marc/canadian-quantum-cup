@@ -28,7 +28,7 @@ def set_flags(d):
     qml.PauliX(9)
     qml.Hadamard(9)
     # state_1+d==state_2?
-    fourier_basis([0,1,2],d)
+    fourier_basis([10,0,1,2],d) # use last qubit for carry
     
     # check if state_1[i]==state_2[i]
     qml.Toffoli([0,3,6])
@@ -43,8 +43,11 @@ def set_flags(d):
     for i in [0,3,1,4,2,5]:
         qml.PauliX(i)
     # all 0s
-    
-    qml.MultiControlledX([6,7,8], 9)
+    # check if carry 0
+    qml.PauliX(10)
+    qml.MultiControlledX([6,7,8,10], 9)
+    qml.PauliX(10)
+    # check if carry 0
     
     qml.Toffoli([0,3,6])
     qml.Toffoli([1,4,7])
@@ -59,7 +62,7 @@ def set_flags(d):
         qml.PauliX(i)
     # all 0s
     
-    inverse_fourier_basis([0,1,2],d)
+    inverse_fourier_basis([10,0,1,2],d)
     qml.Hadamard(9)
     qml.PauliX(9)
     
@@ -68,7 +71,7 @@ def set_flags(d):
         qml.PauliX(9)
         qml.Hadamard(9)
         # state_2+d=state_1
-        fourier_basis([3,4,5],d)
+        fourier_basis([10,3,4,5],d)
 
         # check if state_1[i]==state_2[i]
         qml.Toffoli([0,3,6])
@@ -84,7 +87,11 @@ def set_flags(d):
             qml.PauliX(i)
         # all 0s
 
-        qml.MultiControlledX([6,7,8], 9)
+        # check if carry 0
+        qml.PauliX(10)
+        qml.MultiControlledX([6,7,8,10], 9)
+        qml.PauliX(10)
+        # check if carry 0
 
         qml.Toffoli([0,3,6])
         qml.Toffoli([1,4,7])
@@ -99,7 +106,7 @@ def set_flags(d):
             qml.PauliX(i)
         # all 0s
 
-        inverse_fourier_basis([3,4,5],d)
+        inverse_fourier_basis([10,3,4,5],d)
         qml.Hadamard(9)
         qml.PauliX(9)
 
@@ -113,21 +120,11 @@ def oracle_distance(d):
 
     """
     
-        # Put your code here
-    
     set_flags(d)
     
-#     qml.CNOT((9,6))
-#     qml.CNOT((10,6))
-#     qml.MultiControlledX([9, 10], wires=[6])
 
-#     qml.Hadamard(6) # |->
-#     qml.PauliX(6) # - |->
-#     qml.Hadamard(6) # - |1>
-#     qml.PauliX(6)
-    
-#     set_flags(d)
-
+# These functions are responsible for testing the solution.
+# These functions are responsible for testing the solution.
 # These functions are responsible for testing the solution.
 wires_m = [0, 1, 2]
 wires_n = [3, 4, 5]
@@ -147,17 +144,11 @@ def circuit(m, n, d):
 def run(test_case_input: str) -> str:
     outputs = []
     d = int(json.loads(test_case_input))
-    for n in range(1,8):
-        for m in range(1,8):
-            if m!=n:
-                outputs.append(sum(circuit(n, m, d)).real)
-                print(m,n,d)
-                res = circuit(n, m, d)
-                for dig,r in enumerate(res):
-                    if np.round(r.real,2) > 0:
-                        print(bin(dig)[2:],r)
+    for n in range(8):
+        for m in range(8):
+            outputs.append(sum(circuit(n, m, d)).real)
     outputs.append(d)
-    output_list = [elem for elem in outputs[:-1]] + [outputs[-1]]
+    output_list = [elem.numpy() for elem in outputs[:-1]] + [outputs[-1]]
     return str(output_list)
 
 
@@ -166,16 +157,13 @@ def check(solution_output: str, expected_output: str) -> None:
     solution_output = json.loads(solution_output)
     d = solution_output[-1]
     assert expected_output == "No output", "Something went wrong"
-    for n in range(1,8):
-        for m in range(1,8):
-            if m!=n:
-                solution = 1
-                if abs(n - m) == d:
-                    solution = -1
-                print(n,m,d)
-                assert np.isclose(solution_output[i], solution)
-
-                i += 1
+    for n in range(8):
+        for m in range(8):
+            solution = 1
+            if abs(n - m) == d:
+                solution = -1
+            assert np.isclose(solution_output[i], solution)
+            i += 1
 
     circuit(np.random.randint(7), np.random.randint(7), np.random.randint(7))
     tape = circuit.qtape
@@ -195,8 +183,7 @@ test_cases = [
     ('6', 'No output'),
     ('7', 'No output')
 ]
-    
-    # This will run the public test cases locally
+# This will run the public test cases locally
 for i, (input_, expected_output) in enumerate(test_cases):
     print(f"Running test case {i} with input '{input_}'...")
 

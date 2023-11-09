@@ -1,7 +1,9 @@
 import json
 import pennylane as qml
 import pennylane.numpy as np
-
+import numpy as np
+import matplotlib
+import matplotlib.pyplot as plt
 
 
 def count_peaks():
@@ -62,7 +64,13 @@ def U(n_wires, label):
 
     """
     qml.QFT(wires=[wire for wire in range(n_wires - 1)])
-    qml.MultiControlledX(wires=[n_wires - 1], control_wires=[wire for wire in range(n_wires - 1)], control_values=str(bin(label)).split('b')[-1] + ''.join(['0' for i in range(n_wires - 1 - len(str(bin(label)).split('b')[-1]))]))
+    cv = ''.join(['0' for i in range(n_wires - 1 - len(str(bin(label)).split('b')[-1]))]) + str(bin(label)).split('b')[-1]
+    cv2 = ''.join(['0' for i in range(n_wires - 1 - len(str(bin(label)).split('b')[-1]))]) + str(bin(label - 1)).split('b')[-1]
+    print(cv)
+    qml.MultiControlledX(wires=[n_wires - 1], control_wires=[wire for wire in range(n_wires - 1)], control_values=cv2[::-1])
+    qml.MultiControlledX(wires=[n_wires - 1], control_wires=[wire for wire in range(n_wires - 1)], control_values=cv)
+
+    return qml.measure(wires=[n_wires - 1])
 
 
 # These functions are responsible for testing the solution.
@@ -80,7 +88,17 @@ def run(test_case_input: str) -> str:
         U(n_wires, label)
         return qml.probs(wires=n_wires - 1)
 
+    print(phi)
+
+    x = [i for i in range(len(phi))]
+
+    # plotting
+    # matplotlib.use('TkAgg')
+    # plt.plot(x, phi, color="red")
+    # plt.show()
+
     outcomes = circuit()
+    print(outcomes)
     return str(circuit()[0].numpy())
 
 

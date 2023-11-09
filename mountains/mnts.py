@@ -2,6 +2,54 @@ import json
 import pennylane as qml
 import pennylane.numpy as np
 
+
+
+def count_peaks():
+    pass
+
+
+def fractional_binary_to_float(s):
+    """ Helper function to expand fractional binary numbers as floats.
+
+    :param s (string): A string in the form "0.xxxx" where the x are 0s and 1s.
+    :return: The numerical value when converted from fractional binary to float.
+    """
+
+    assert '.' == s[1]
+    assert s[0] == '0'
+
+    for bit in s[2:]:
+        assert bit in ('0', '1')
+
+    bin = s.split('.')[-1]
+
+    power_of_two = -1
+    sum = 0
+    for bit in bin:
+        if bit == '1':
+            sum += 2 ** power_of_two
+        power_of_two -= 1
+
+    return sum
+
+
+def results_to_eigenvalue(results):
+    """ Converts from the QPE probability histogram output to computed eigenvalue.
+
+    :param results: The results from the the QPE algorithm.
+    :return: The eigenvalue computed.
+    """
+
+    for i, result in enumerate(results):
+        if np.isclose(result, 1):
+            break
+
+    print(f"fractional binary: 0.{str(bin(i)).split('b')[-1]}")
+    flt = fractional_binary_to_float(f"0.{str(bin(i)).split('b')[-1]}")
+    eigenvalue = complex(np.cos(2 * np.pi * flt), np.sin(2 * np.pi * flt))
+
+    return eigenvalue
+
 def U(n_wires, label):
 
     """
@@ -13,8 +61,8 @@ def U(n_wires, label):
         label (int): Number of mountains that we believe the function has
 
     """
-    # Put your code here #
-
+    qml.QFT(wires=[wire for wire in range(n_wires - 1)])
+    qml.MultiControlledX(wires=[n_wires - 1], control_wires=[wire for wire in range(n_wires - 1)], control_values=str(bin(label)).split('b')[-1] + ''.join(['0' for i in range(n_wires - 1 - len(str(bin(label)).split('b')[-1]))]))
 
 
 # These functions are responsible for testing the solution.
@@ -32,6 +80,7 @@ def run(test_case_input: str) -> str:
         U(n_wires, label)
         return qml.probs(wires=n_wires - 1)
 
+    outcomes = circuit()
     return str(circuit()[0].numpy())
 
 
